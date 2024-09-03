@@ -1,60 +1,57 @@
 const express = require("express");
-// const bodyParser = require("body-parser"); /* deprecated */
-const multer = require("multer");
-const fs = require("fs");
 const cors = require("cors");
-
+const multer = require("multer");
+const path = require("path");
 const { v4: uuidv4 } = require("uuid");
-const upload = multer({ dest: "./app/uploads/" });
 
 const app = express();
 
+// Configurer les options de CORS
 var corsOptions = {
   origin: "http://localhost:8081"
 };
 
 app.use(cors(corsOptions));
 
-// Route POST pour recevoir un fichier
-app.post("/api/image", upload.single("image"), (req, res) => {
-  if (!req.file) {
-    return res.status(400).send("Aucun fichier n'a été uploadé.");
+// Middleware pour parser les requêtes de type application/json
+app.use(express.json());
+
+// Middleware pour parser les requêtes de type application/x-www-form-urlencoded
+app.use(express.urlencoded({ extended: true }));
+
+// Configurer Multer pour l'upload de fichiers
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, './app/uploads/');
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `${uuidv4()}${ext}`)
   }
-
-  // On récupère le nom du fichier
-  const { originalname, filename } = req.file;
-
-  // On utilise la fonction rename de fs pour renommer le fichier
-  fs.rename(`./app/uploads/${filename}`, `./app/uploads/${uuidv4()}-${originalname}`, (err) => {
-    if (err) {
-      return res.status(500).send("Erreur lors du renommage du fichier.");
-    }
-    res.send("Fichier uploadé avec succès.");
-  });
 });
+const upload = multer({ storage });
 
-
-// Parse requests of content-type - application/json
-app.use(express.json());  /* bodyParser.json() is deprecated */
-
-// Parse requests of content-type - application/x-www-form-urlencoded
-app.use(express.urlencoded({ extended: true }));   /* bodyParser.urlencoded() is deprecated */
-
+// Base de données
 const db = require("./app/models");
 db.sequelize.sync();
-// // Drop the table if it already exists
+// // Uncomment this line if you want to drop and re-sync the database
 // db.sequelize.sync({ force: true }).then(() => {
 //   console.log("Drop and re-sync db.");
 // });
 
-// Simple route
+// Route simple pour vérifier que l'application fonctionne
 app.get("/", (req, res) => {
-  res.json({ message: "Welcome to bezkoder application." });
+  res.json({ message: "Welcome to the application." });
 });
 
+// Route pour créer un tutoriel avec upload d'image
+const tutorials = require("./app/controllers/tutorial.controller");
+app.post("/api/tutorials", upload.single("image"), tutorials.create);
+
+// Inclure d'autres routes pour le CRUD des tutoriels
 require("./app/routes/tutorial.routes")(app);
 
-// Set port, listen for requests
+// Définir le port et démarrer le serveur
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
