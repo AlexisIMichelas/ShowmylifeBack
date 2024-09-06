@@ -19,6 +19,9 @@ app.use(express.json());
 // Middleware pour parser les requêtes de type application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
 
+// Servir des fichiers statiques à partir du répertoire 'uploads'
+app.use('/uploads', express.static(path.join(__dirname, 'app/uploads')));
+
 // Configurer Multer pour l'upload de fichiers
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -26,7 +29,7 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
-    cb(null, `${uuidv4()}${ext}`)
+    cb(null, `${uuidv4()}${ext}`);
   }
 });
 const upload = multer({ storage });
@@ -34,10 +37,6 @@ const upload = multer({ storage });
 // Base de données
 const db = require("./app/models");
 db.sequelize.sync();
-// // Uncomment this line if you want to drop and re-sync the database
-// db.sequelize.sync({ force: true }).then(() => {
-//   console.log("Drop and re-sync db.");
-// });
 
 // Route simple pour vérifier que l'application fonctionne
 app.get("/", (req, res) => {
