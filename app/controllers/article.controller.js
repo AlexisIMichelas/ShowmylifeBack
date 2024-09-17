@@ -1,5 +1,5 @@
 const db = require("../models");
-const Tutorial = db.tutorials;
+const Article = db.articles;
 const Op = db.Sequelize.Op;
 const path = require('path');
 const fs = require('fs');
@@ -28,7 +28,7 @@ exports.create = (req, res) => {
   }
 
   // Créez un tutoriel
-  const tutorial = {
+  const article = {
     title: req.body.title,
     description: req.body.description,
     published: req.body.published ? req.body.published : false,
@@ -36,7 +36,7 @@ exports.create = (req, res) => {
   };
 
   // Enregistrez le tutoriel dans la base de données
-  Tutorial.create(tutorial)
+  Article.create(article)
     .then(data => {
       res.status(201).send(data);
     })
@@ -52,7 +52,7 @@ exports.findAll = (req, res) => {
   const title = req.query.title;
   var condition = title ? { title: { [Op.iLike]: `%${title}%` } } : null;
 
-  Tutorial.findAll({ where: condition })
+  Article.findAll({ where: condition })
     .then(data => {
       res.send(data);
     })
@@ -67,13 +67,13 @@ exports.findAll = (req, res) => {
 exports.findOne = (req, res) => {
   const id = req.params.id;
 
-  Tutorial.findByPk(id)
+  Article.findByPk(id)
     .then(data => {
       if (data) {
         res.send(data);
       } else {
         res.status(404).send({
-          message: `Impossible de trouver le tutoriel avec l'id=${id}.`
+          message: `Impossible de trouver l'article' avec l'id=${id}.`
         });
       }
     })
@@ -88,7 +88,7 @@ exports.findOne = (req, res) => {
 exports.update = (req, res) => {
   const id = req.params.id;
 
-  Tutorial.update(req.body, {
+  Article.update(req.body, {
     where: { id: id }
   })
     .then(num => {
@@ -113,7 +113,7 @@ exports.update = (req, res) => {
 exports.delete = (req, res) => {
   const id = req.params.id;
 
-  Tutorial.destroy({
+  Article.destroy({
     where: { id: id }
   })
     .then(num => {
@@ -136,7 +136,7 @@ exports.delete = (req, res) => {
 
 // Supprimer tous les tutoriels de la base de données
 exports.deleteAll = (req, res) => {
-  Tutorial.destroy({
+  Article.destroy({
     where: {},
     truncate: false
   })
@@ -152,7 +152,7 @@ exports.deleteAll = (req, res) => {
 
 // Trouver tous les tutoriels publiés
 exports.findAllPublished = (req, res) => {
-  Tutorial.findAll({ where: { published: true } })
+  Article.findAll({ where: { published: true } })
     .then(data => {
       res.send(data);
     })

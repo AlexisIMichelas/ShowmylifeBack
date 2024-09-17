@@ -44,11 +44,11 @@ app.get("/", (req, res) => {
 });
 
 // Route pour créer un tutoriel avec upload d'image
-const tutorials = require("./app/controllers/tutorial.controller");
-app.post("/api/tutorials", upload.single("image"), tutorials.create);
+const articles = require("./app/controllers/article.controller");
+app.post("/api/articles", upload.single("image"), articles.create);
 
 // Inclure d'autres routes pour le CRUD des tutoriels
-require("./app/routes/tutorial.routes")(app);
+require("./app/routes/article.routes")(app);
 
 // Définir le port et démarrer le serveur
 const PORT = process.env.PORT || 8080;
