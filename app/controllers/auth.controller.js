@@ -1,3 +1,4 @@
+// app/controllers/auth.controller.js
 const db = require("../models");
 const config = require("../config/auth.config");
 const User = db.user;
@@ -9,7 +10,6 @@ var jwt = require("jsonwebtoken");
 var bcrypt = require("bcryptjs");
 
 exports.signup = (req, res) => {
-  // Save User to Database
   User.create({
     username: req.body.username,
     email: req.body.email,
@@ -29,7 +29,6 @@ exports.signup = (req, res) => {
           });
         });
       } else {
-        // user role = 1
         user.setRoles([1]).then(() => {
           res.send({ message: "User registered successfully!" });
         });
@@ -51,11 +50,7 @@ exports.signin = (req, res) => {
         return res.status(404).send({ message: "User Not found." });
       }
 
-      var passwordIsValid = bcrypt.compareSync(
-        req.body.password,
-        user.password
-      );
-
+      var passwordIsValid = bcrypt.compareSync(req.body.password, user.password);
       if (!passwordIsValid) {
         return res.status(401).send({
           accessToken: null,
@@ -63,13 +58,11 @@ exports.signin = (req, res) => {
         });
       }
 
-      const token = jwt.sign({ id: user.id },
-                              config.secret,
-                              {
-                                algorithm: 'HS256',
-                                allowInsecureKeySizes: true,
-                                expiresIn: 86400, // 24 hours
-                              });
+      const token = jwt.sign({ id: user.id }, config.secret, {
+        algorithm: 'HS256',
+        allowInsecureKeySizes: true,
+        expiresIn: 86400, // 24 hours
+      });
 
       var authorities = [];
       user.getRoles().then(roles => {
@@ -88,4 +81,9 @@ exports.signin = (req, res) => {
     .catch(err => {
       res.status(500).send({ message: err.message });
     });
+};
+
+exports.signout = (req, res) => {
+  // Logique pour la déconnexion
+  res.status(200).send({ message: "Déconnexion réussie." });
 };

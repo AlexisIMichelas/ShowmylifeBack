@@ -1,3 +1,6 @@
+const path = require('path'); // Assurez-vous que le module path est importé
+const { v4: uuidv4 } = require('uuid'); // Assurez-vous que uuidv4 est importé
+
 module.exports = app => {
   const articles = require("../controllers/article.controller.js");
   const multer = require('multer'); // Importer multer pour la gestion des fichiers
@@ -7,11 +10,11 @@ module.exports = app => {
   // Configuration du stockage pour multer
   const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-      cb(null, './app/uploads/');
+      cb(null, './app/uploads/'); // Chemin vers le dossier uploads
     },
     filename: (req, file, cb) => {
-      const ext = path.extname(file.originalname);
-      cb(null, `${uuidv4()}${ext}`);
+      const ext = path.extname(file.originalname); // Récupérer l'extension du fichier
+      cb(null, `${uuidv4()}${ext}`); // Générer un nom de fichier unique
     }
   });
   
