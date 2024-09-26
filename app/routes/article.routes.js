@@ -1,27 +1,38 @@
 module.exports = app => {
   const articles = require("../controllers/article.controller.js");
+  const multer = require('multer'); // Importer multer pour la gestion des fichiers
 
   var router = require("express").Router();
 
+  // Configuration du stockage pour multer
+  const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, './app/uploads/');
+    },
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname);
+      cb(null, `${uuidv4()}${ext}`);
+    }
+  });
+  
+  const upload = multer({ storage }); // Initialiser multer avec le stockage configuré
+
   // Create a new Article
-  router.post("/", articles.create);
+  router.post("/", upload.single('image'), articles.create);
 
-  // Retrieve all Tutorials
+  // Retrieve all Articles
   router.get("/", articles.findAll);
-
-  // Retrieve all published Tutorials
-  router.get("/published", articles.findAllPublished);
 
   // Retrieve a single Article with id
   router.get("/:id", articles.findOne);
 
-  // Update a Article with id
-  router.put("/:id", articles.update);
+  // Update an Article with id
+  router.put("/:id", upload.single('image'), articles.update); // Utiliser multer pour mettre à jour
 
-  // Delete a Article with id
+  // Delete an Article
   router.delete("/:id", articles.delete);
 
-  // Delete all Tutorials
+  // Delete all Articles
   router.delete("/", articles.deleteAll);
 
   app.use("/api/articles", router);

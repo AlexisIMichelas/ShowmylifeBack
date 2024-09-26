@@ -8,6 +8,7 @@ const app = express();
 
 // Configurer les options de CORS
 var corsOptions = {
+  credentials: true,
   origin: "http://localhost:8081"
 };
 
@@ -36,19 +37,33 @@ const upload = multer({ storage });
 
 // Base de données
 const db = require("./app/models");
-db.sequelize.sync();
+const Role = db.role;
+
+// Synchroniser la base de données
+db.sequelize.sync().then(() => {
+  console.log('Database synchronized.');
+  initial();
+});
+
+// Initialiser les rôles
+function initial() {
+  Role.findOrCreate({ where: { id: 1, name: "user" } });
+  Role.findOrCreate({ where: { id: 3, name: "admin" } });
+}
 
 // Route simple pour vérifier que l'application fonctionne
 app.get("/", (req, res) => {
   res.json({ message: "Welcome to the application." });
 });
 
-// Route pour créer un tutoriel avec upload d'image
+// Routes pour les articles
 const articles = require("./app/controllers/article.controller");
 app.post("/api/articles", upload.single("image"), articles.create);
-
-// Inclure d'autres routes pour le CRUD des tutoriels
 require("./app/routes/article.routes")(app);
+
+// Routes pour la gestion des utilisateurs et authentification
+require('./app/routes/auth.routes')(app);
+require('./app/routes/user.routes')(app);
 
 // Définir le port et démarrer le serveur
 const PORT = process.env.PORT || 8080;
