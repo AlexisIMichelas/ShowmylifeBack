@@ -8,6 +8,21 @@ const Op = db.Sequelize.Op;
 var jwt = require("jsonwebtoken");
 var bcrypt = require("bcryptjs");
 
+exports.changeEmail = (req, res) => {
+  const userId = req.userId;
+  const newEmail = req.body.email;
+
+  // Rechercher l'utilisateur et mettre à jour l'email
+  User.update({ email: newEmail }, { where: { id: userId } })
+    .then(() => {
+      res.status(200).send({ message: "Email updated successfully!" });
+    })
+    .catch(err => {
+      res.status(500).send({ message: err.message });
+    });
+};
+
+
 exports.signup = (req, res) => {
   // Save User to Database
   User.create({
