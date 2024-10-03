@@ -22,6 +22,34 @@ exports.changeEmail = (req, res) => {
     });
 };
 
+exports.changePassword = (req, res) => {
+  const userId = req.userId;
+  const currentPassword = req.body.currentPassword;
+  const newPassword = req.body.newPassword;
+
+  User.findByPk(userId).then(user => {
+    if (!user) {
+      return res.status(404).send({ message: "Utilisateur non trouvé!" });
+    }
+
+    // Vérifier si le mot de passe actuel est correct
+    var passwordIsValid = bcrypt.compareSync(currentPassword, user.password);
+    if (!passwordIsValid) {
+      return res.status(401).send({ message: "Mot de passe actuel incorrect!" });
+    }
+
+    // Mettre à jour le mot de passe
+    user.password = bcrypt.hashSync(newPassword, 8);
+    user.save().then(() => {
+      res.status(200).send({ message: "Mot de passe changé avec succès!" });
+    }).catch(err => {
+      res.status(500).send({ message: err.message });
+    });
+  }).catch(err => {
+    res.status(500).send({ message: err.message });
+  });
+};
+
 
 exports.signup = (req, res) => {
   // Save User to Database

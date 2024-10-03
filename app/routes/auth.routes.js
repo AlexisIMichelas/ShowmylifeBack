@@ -22,4 +22,7 @@ module.exports = function(app) {
   app.post("/api/auth/signin", controller.signin);
 
   app.put("/api/auth/change-email", [authJwt.verifyToken], controller.changeEmail);
+
+  app.put("/api/auth/change-password", [authJwt.verifyToken], controller.changePassword);
+
 };
