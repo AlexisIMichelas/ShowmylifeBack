@@ -1,3 +1,4 @@
+const nodemailer = require("nodemailer");
 const db = require("../models");
 const config = require("../config/auth.config");
 const User = db.user;
@@ -5,10 +6,49 @@ const Role = db.role;
 
 const Op = db.Sequelize.Op;
 
-var jwt = require("jsonwebtoken");
-var bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 
-exports.changeEmail = (req, res) => {
+// Configuration du transporteur pour envoyer les emails via Gmail
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL, // Utiliser une variable d'environnement pour l'email
+    pass: process.env.PASSWORD, // Utiliser une variable d'environnement pour le mot de passe
+  },
+});
+
+// Fonction pour envoyer l'email de contact
+const sendContactEmail = async (req, res) => {
+  const { name, email, message } = req.body;
+
+  // Valider les données reçues
+  if (!name || !email || !message) {
+    return res.status(400).send({ message: "Tous les champs sont requis." });
+  }
+
+  // Options de l'email
+  const mailOptions = {
+    from: email, // L'email de l'expéditeur
+    to: process.env.RECIPIENT_EMAIL, // Destinataire, par exemple, une adresse email d'assistance
+    subject: `Nouveau message de ${name}`, // Sujet de l'email
+    text: message, // Contenu texte
+    html: `<p><strong>Nom:</strong> ${name}</p><p><strong>Email:</strong> ${email}</p><p><strong>Message:</strong> ${message}</p>`, // Contenu HTML
+  };
+
+  try {
+    // Envoyer l'email
+    await transporter.sendMail(mailOptions);
+    res.status(200).send({ message: "Email envoyé avec succès!" });
+  } catch (error) {
+    console.error("Erreur lors de l'envoi de l'email : ", error);
+    res.status(500).send({ message: "Erreur lors de l'envoi de l'email." });
+  }
+};
+
+// Autres fonctions
+
+const changeEmail = (req, res) => {
   const userId = req.userId;
   const newEmail = req.body.email;
 
@@ -22,7 +62,7 @@ exports.changeEmail = (req, res) => {
     });
 };
 
-exports.changePassword = (req, res) => {
+const changePassword = (req, res) => {
   const userId = req.userId;
   const currentPassword = req.body.currentPassword;
   const newPassword = req.body.newPassword;
@@ -50,8 +90,7 @@ exports.changePassword = (req, res) => {
   });
 };
 
-
-exports.signup = (req, res) => {
+const signup = (req, res) => {
   // Save User to Database
   User.create({
     username: req.body.username,
@@ -83,7 +122,7 @@ exports.signup = (req, res) => {
     });
 };
 
-exports.signin = (req, res) => {
+const signin = (req, res) => {
   User.findOne({
     where: {
       username: req.body.username
@@ -131,4 +170,13 @@ exports.signin = (req, res) => {
     .catch(err => {
       res.status(500).send({ message: err.message });
     });
+};
+
+// Exporter les fonctions du contrôleur
+module.exports = {
+  sendContactEmail,
+  changeEmail,
+  changePassword,
+  signup,
+  signin
 };
