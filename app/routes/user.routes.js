@@ -1,32 +1,27 @@
-const { authJwt } = require("../middleware");
-const controller = require("../controllers/user.controller");
+const controller = require("../controllers/user.controller"); // Assurez-vous que le contrôleur est correctement importé
 
 module.exports = function(app) {
+  // Middleware pour gérer les CORS
   app.use(function(req, res, next) {
     res.header(
       "Access-Control-Allow-Headers",
-      "x-access-token, Origin, Content-Type, Accept"
+      "Origin, Content-Type, Accept"
     );
     next();
   });
 
-  app.get("/api/test/all", controller.allAccess);
+  // Route pour récupérer tous les utilisateurs
+  app.get("/api/users", controller.findAll);
 
-  app.get(
-    "/api/test/user",
-    [authJwt.verifyToken],
-    controller.userBoard
-  );
+  // Route pour récupérer un utilisateur par ID
+  app.get("/api/users/:id", controller.findOne);
 
-  app.get(
-    "/api/test/mod",
-    [authJwt.verifyToken, authJwt.isModerator],
-    controller.moderatorBoard
-  );
+  // Route pour mettre à jour un utilisateur par ID
+  app.put("/api/users/:id", controller.update);
 
-  app.get(
-    "/api/test/admin",
-    [authJwt.verifyToken, authJwt.isAdmin],
-    controller.adminBoard
-  );
+  // Route pour supprimer un utilisateur par ID
+  app.delete("/api/users/:id", controller.delete);
+
+  // Route pour supprimer tous les utilisateurs
+  app.delete("/api/users", controller.deleteAll);
 };
