@@ -63,6 +63,9 @@ const articles = require("./app/controllers/article.controller");
 app.post("/api/articles", upload.single("image"), articles.create);
 require("./app/routes/article.routes")(app);
 
+const commentRoutes = require("./app/routes/comment.routes");
+app.use("/api", commentRoutes)
+
 // Routes pour la gestion des utilisateurs et authentification
 require('./app/routes/auth.routes')(app);
 require('./app/routes/user.routes')(app);
