@@ -6,7 +6,7 @@ const bodyParser = require("body-parser");
 const app = express();
 
 // Configurer les options de CORS
-const corsOptions = {
+var corsOptions = {
   credentials: true,
   origin: "*"
 };

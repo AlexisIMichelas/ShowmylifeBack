@@ -1,14 +1,20 @@
-const dbConfig = require("../config/db.config.js");
 const Sequelize = require("sequelize");
 
-const sequelize = new Sequelize(dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
-  host: dbConfig.HOST,
-  dialect: dbConfig.dialect,
+const sequelize = new Sequelize(process.env.DATABASE_URL, {
+  dialect: "postgres",
+  protocol: "postgres",
+  dialectModule: require('pg'),  // Spécifier explicitement le module pg
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false  // Nécessaire si SSL est requis mais sans vérification stricte des certificats
+    }
+  },
   pool: {
-    max: dbConfig.pool.max,
-    min: dbConfig.pool.min,
-    acquire: dbConfig.pool.acquire,
-    idle: dbConfig.pool.idle
+    max: 5,            // Nombre maximum de connexions simultanées
+    min: 0,            // Nombre minimum de connexions à maintenir ouvertes
+    acquire: 30000,    // Délai maximal pour établir une connexion
+    idle: 10000        // Durée avant qu'une connexion inactive soit fermée
   }
 });
 
@@ -24,40 +30,14 @@ db.role = require("../models/role.model.js")(sequelize, Sequelize);
 db.comment = require("../models/comment.model.js")(sequelize, Sequelize);
 
 // Définir les associations
-db.role.belongsToMany(db.user, {
-  through: "user_roles"
-});
-db.user.belongsToMany(db.role, {
-  through: "user_roles"
-});
+db.role.belongsToMany(db.user, { through: "user_roles" });
+db.user.belongsToMany(db.role, { through: "user_roles" });
 
-// Définition des associations pour Comment
-db.comment.associate = (models) => {
-  db.comment.belongsTo(models.user, {
-    foreignKey: 'userId',
-    as: 'user' // Utilisé pour inclure les données de l'utilisateur
-  });
-  db.comment.belongsTo(models.articles, {
-    foreignKey: 'articleId',
-    as: 'article' // Utilisé pour inclure les données de l'article
-  });
-};
+db.comment.belongsTo(db.user, { foreignKey: 'userId', as: 'user' });
+db.comment.belongsTo(db.articles, { foreignKey: 'articleId', as: 'article' });
 
-// Définition des associations pour Article
-db.articles.associate = (models) => {
-  db.articles.hasMany(models.comment, {
-    foreignKey: 'articleId',
-    as: 'comments' // Utilisé pour récupérer les commentaires d'un article
-  });
-};
-
-// Définition des associations pour User
-db.user.associate = (models) => {
-  db.user.hasMany(models.comment, {
-    foreignKey: 'userId',
-    as: 'comments' // Utilisé pour récupérer les commentaires d'un utilisateur
-  });
-};
+db.articles.hasMany(db.comment, { foreignKey: 'articleId', as: 'comments' });
+db.user.hasMany(db.comment, { foreignKey: 'userId', as: 'comments' });
 
 db.ROLES = ["user", "admin", "moderator"];
 
