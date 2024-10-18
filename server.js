@@ -1,19 +1,21 @@
 require('dotenv').config();
 const express = require("express");
-const cors = require("cors");// Assurez-vous que le chemin est correct
-const db = require("./app/models");
+const cors = require("cors");
 const bodyParser = require("body-parser");
+const db = require("./app/models");
+
 const app = express();
 
 // Configurer les options de CORS
-var corsOptions = {
+const corsOptions = {
   credentials: true,
   origin: "*"
 };
 
-// Middleware pour les requêtes
 app.use(cors(corsOptions));
-app.use(bodyParser.json({ limit: '10mb' })); // Définit la taille maximale du corps JSON à 10 Mo
+
+// Middleware pour parser les requêtes de type application/json
+app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 
 // Synchroniser la base de données
@@ -38,9 +40,9 @@ app.get("/", (req, res) => {
 
 // Routes pour les articles
 const articles = require("./app/controllers/article.controller");
-// Suppression de l'upload Multer, car nous gérons les images directement via Cloudinary
-app.post("/api/articles", articles.create); // Plus besoin de gérer les uploads de fichiers localement
-require("./app/routes/article.routes")(app); // Routes d'articles
+// Supprimer l'upload Multer car on utilise Cloudinary
+app.post("/api/articles", articles.create);
+require("./app/routes/article.routes")(app);
 
 // Routes pour la gestion des utilisateurs et authentification
 require('./app/routes/auth.routes')(app);
