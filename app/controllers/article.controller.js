@@ -147,14 +147,19 @@ exports.delete = async (req, res) => {
   }
 };
 
-// Supprimer tous les articles
-exports.deleteAll = async (req, res) => {
-  try {
-    const nums = await Article.destroy({ where: {}, truncate: true });
+// Supprimer tous les articles et leurs commentaires
+exports.deleteAll = (req, res) => {
+  Article.destroy({
+    where: {},
+    truncate: false
+  })
+  .then(nums => {
     res.send({ message: `${nums} articles ont été supprimés avec succès !` });
-  } catch (err) {
+  })
+  .catch(err => {
     res.status(500).send({
       message: err.message || "Une erreur est survenue lors de la suppression de tous les articles."
     });
-  }
+  });
 };
+
