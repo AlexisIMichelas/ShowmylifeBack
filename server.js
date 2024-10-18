@@ -1,11 +1,8 @@
 require('dotenv').config();
 const express = require("express");
-const cors = require("cors");
-const multer = require("multer");
-const path = require("path");
-const { v4: uuidv4 } = require("uuid");
-const cloudinary = require('./app/config/cloudinary.config'); // Assurez-vous que le chemin est correct
+const cors = require("cors");// Assurez-vous que le chemin est correct
 const db = require("./app/models");
+const bodyParser = require("body-parser");
 const app = express();
 
 // Configurer les options de CORS
@@ -16,23 +13,8 @@ const corsOptions = {
 
 // Middleware pour les requêtes
 app.use(cors(corsOptions));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Servir des fichiers statiques à partir du répertoire 'uploads'
-app.use('/uploads', express.static(path.join(__dirname, 'app/uploads')));
-
-// Configurer Multer pour l'upload de fichiers
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, './app/uploads/');
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, `${uuidv4()}${ext}`);
-  }
-});
-const upload = multer({ storage });
+app.use(bodyParser.json({ limit: '10mb' })); // Définit la taille maximale du corps JSON à 10 Mo
+app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 
 // Synchroniser la base de données
 db.sequelize.sync({ alter: true }).then(() => {
@@ -56,7 +38,8 @@ app.get("/", (req, res) => {
 
 // Routes pour les articles
 const articles = require("./app/controllers/article.controller");
-app.post("/api/articles", upload.single("image"), articles.create); // Gérer l'upload d'images avec multer
+// Suppression de l'upload Multer, car nous gérons les images directement via Cloudinary
+app.post("/api/articles", articles.create); // Plus besoin de gérer les uploads de fichiers localement
 require("./app/routes/article.routes")(app); // Routes d'articles
 
 // Routes pour la gestion des utilisateurs et authentification

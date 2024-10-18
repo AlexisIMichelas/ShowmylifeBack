@@ -35,40 +35,62 @@ exports.create = async (req, res) => {
   }
 };
 
-// Mettre à jour un article par son ID
 exports.update = async (req, res) => {
   const id = req.params.id;
 
   try {
-    // Chercher l'article à mettre à jour
-    const articleToUpdate = await Article.findByPk(id);
-    if (!articleToUpdate) {
-      return res.status(404).send({ message: "Article non trouvé." });
-    }
+      // Chercher l'article à mettre à jour
+      const articleToUpdate = await Article.findByPk(id);
+      if (!articleToUpdate) {
+          return res.status(404).send({ message: "Article non trouvé." });
+      }
 
-    // Mettre à jour les champs fournis
-    const updatedArticle = {
-      title: req.body.title || articleToUpdate.title,
-      description: req.body.description || articleToUpdate.description,
-      published: req.body.published !== undefined ? req.body.published : articleToUpdate.published
-    };
+      // Préparer les champs à mettre à jour
+      const updatedArticle = {
+          title: req.body.title || articleToUpdate.title,
+          description: req.body.description || articleToUpdate.description,
+          published: req.body.published !== undefined ? req.body.published : articleToUpdate.published,
+          image: articleToUpdate.image // Garder l'ancienne image par défaut
+      };
 
-    // Si une nouvelle image est fournie, la télécharger sur Cloudinary
-    if (req.body.image) {
-      const result = await cloudinary.uploader.upload(req.body.image, {
-        folder: "my_upload_preset"
+      // Si une nouvelle image est fournie, la télécharger sur Cloudinary
+      if (req.body.image) {
+          try {
+              const result = await cloudinary.uploader.upload(req.body.image, {
+                  folder: "my_upload_preset"
+              });
+              console.log("Image uploaded to Cloudinary:", result);
+              updatedArticle.image = result.secure_url; // Mettre à jour l'URL de l'image
+          } catch (uploadError) {
+              console.error("Erreur lors du téléchargement de l'image sur Cloudinary:", uploadError);
+              return res.status(400).send({
+                  message: "Erreur lors du téléchargement de l'image sur Cloudinary."
+              });
+          }
+      }
+
+      // Mettre à jour l'article dans la base de données
+      const [num] = await Article.update(updatedArticle, {
+          where: { id: id }
       });
-      updatedArticle.image = result.secure_url; // Mettre à jour l'URL de l'image
-    }
 
-    // Mettre à jour l'article dans la base de données
-    await Article.update(updatedArticle, { where: { id: id } });
-    res.send({ message: "L'article a été mis à jour avec succès." });
+      if (num == 1) {
+          // Optionnel : récupérer l'article mis à jour pour confirmation
+          const updatedArticleData = await Article.findByPk(id);
+          res.send({
+              message: "L'article a été mis à jour avec succès.",
+              updatedArticle: updatedArticleData // renvoie les nouvelles données
+          });
+      } else {
+          res.send({
+              message: `Impossible de mettre à jour l'article avec l'id=${id}. Peut-être que l'article n'a pas été trouvé ou que req.body est vide !`
+          });
+      }
   } catch (err) {
-    console.error("Erreur lors de la mise à jour de l'article:", err);
-    res.status(500).send({
-      message: "Erreur lors de la mise à jour de l'article avec l'id=" + id
-    });
+      console.error("Erreur lors de la mise à jour de l'article:", err);
+      res.status(500).send({
+          message: "Erreur lors de la mise à jour de l'article avec l'id=" + id
+      });
   }
 };
 
