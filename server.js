@@ -8,11 +8,15 @@ const app = express();
 
 // Configurer les options de CORS
 const corsOptions = {
-    credentials: true, 
-    origin: 'https://showmylife.vercel.app', // Autoriser uniquement cette origine en production
-    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Méthodes autorisées
-    allowedHeaders: ['Content-Type', 'Authorization'] // Autoriser certains en-têtes
+    credentials: true, // Permet d'envoyer des cookies ou des informations d'identification dans les requêtes
+    origin: 'https://showmylife.vercel.app', // Autoriser uniquement cette origine (le frontend en production)
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Autoriser ces méthodes HTTP
+    allowedHeaders: ['Content-Type', 'Authorization'], // En-têtes autorisés dans les requêtes
+    exposedHeaders: ['Content-Length', 'X-Kuma-Revision'], // En-têtes qui peuvent être exposés au frontend
   };
+  
+  app.use(cors(corsOptions)); // Appliquer cette configuration CORS à l'application
+  
 
 app.use(cors(corsOptions));
 
