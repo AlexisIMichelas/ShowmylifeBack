@@ -8,8 +8,11 @@ const app = express();
 
 var corsOptions = {
     credentials: true,
-    origin: "*"
+    origin: 'https://showmylife-be16pjn06-alexisimichelas-projects.vercel.app', // Spécifiez l'origine de votre front-end
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Méthodes autorisées
+    allowedHeaders: ['Content-Type', 'Authorization'], // En-têtes autorisés
   };
+  
 
 app.use(cors(corsOptions));
 
