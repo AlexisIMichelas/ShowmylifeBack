@@ -8,7 +8,7 @@ const app = express();
 
 var corsOptions = {
     credentials: true,
-    origin: 'https://showmylife.vercel.app/', // Spécifiez l'origine de votre front-end
+    origin: '*', // Spécifiez l'origine de votre front-end
     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Méthodes autorisées
     allowedHeaders: ['Content-Type', 'Authorization'], // En-têtes autorisés
   };
