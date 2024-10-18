@@ -15,7 +15,6 @@ const corsOptions = {
     exposedHeaders: ['Content-Length', 'X-Kuma-Revision'], // En-têtes qui peuvent être exposés au frontend
   };
   
-  app.use(cors(corsOptions)); // Appliquer cette configuration CORS à l'application
   
 
 app.use(cors(corsOptions));
