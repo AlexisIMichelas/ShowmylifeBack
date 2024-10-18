@@ -7,10 +7,12 @@ const db = require("./app/models");
 const app = express();
 
 // Configurer les options de CORS
-var corsOptions = {
-  credentials: true,
-  origin: "*"
-};
+const corsOptions = {
+    credentials: true, 
+    origin: 'https://showmylife.vercel.app', // Autoriser uniquement cette origine en production
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Méthodes autorisées
+    allowedHeaders: ['Content-Type', 'Authorization'] // Autoriser certains en-têtes
+  };
 
 app.use(cors(corsOptions));
 
