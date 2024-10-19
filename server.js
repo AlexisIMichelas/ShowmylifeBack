@@ -20,8 +20,8 @@ app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 
 // Synchroniser la base de données
-db.sequelize.sync({ alter: true }).then(() => {
-  console.log('Database synchronized successfully.');
+db.sequelize.sync({ force: true }).then(() => {
+  console.log('Database synchronized and all tables recreated.');
 });
 
 // Initialiser les rôles
