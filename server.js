@@ -20,10 +20,12 @@ app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 
 // Synchroniser la base de données
-db.sequelize.sync({ force: true }).then(() => {
-  console.log('Database synchronized and all tables recreated.');
+db.sequelize.sync({ alter: true }).then(() => {
+  console.log('Database synchronized and tables updated.');
+  initial();  // Initialiser les rôles après la synchronisation
+}).catch(err => {
+  console.error("Erreur lors de la synchronisation de la base de données : ", err);
 });
-
 // Initialiser les rôles
 function initial() {
   const Role = db.role; // Importer le modèle Role
