@@ -40,6 +40,15 @@ app.get("/", (req, res) => {
   res.json({ message: "Welcome to the application." });
 });
 
+app.get("/initdb", async (req, res) => {
+  try {
+    await init_db();
+    res.status(200).json({ message: "Database initialized successfully." });
+  } catch (error) {
+    res.status(500).json({ message: "Error initializing database", error });
+  }
+});
+
 // Routes pour les articles
 const articles = require("./app/controllers/article.controller");
 // Supprimer l'upload Multer car on utilise Cloudinary
