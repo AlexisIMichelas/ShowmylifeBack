@@ -24,6 +24,13 @@ db.sequelize.sync({ alter: true }).then(() => {
   console.log('Database synchronized successfully.');
 });
 
+// Initialiser les rôles
+function initial() {
+  const Role = db.role; // Importer le modèle Role
+  Role.findOrCreate({ where: { id: 1, name: "user" } });
+  Role.findOrCreate({ where: { id: 3, name: "admin" } });
+}
+
 // Route simple pour vérifier que l'application fonctionne
 app.get("/", (req, res) => {
   res.json({ message: "Welcome to the application." });
