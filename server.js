@@ -7,11 +7,10 @@ const db = require("./app/models");
 const app = express();
 
 var corsOptions = {
-    credentials: true,
-    origin: '*', // Spécifiez l'origine de votre front-end
-    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Méthodes autorisées
-    allowedHeaders: ['Content-Type', 'Authorization'], // En-têtes autorisés
-  };
+  origin: '*', // Allow all origins
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed methods
+  allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
+};
   
 
 app.use(cors(corsOptions));
