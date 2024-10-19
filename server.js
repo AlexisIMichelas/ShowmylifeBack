@@ -7,11 +7,10 @@ const db = require("./app/models");
 const app = express();
 
 var corsOptions = {
-  origin: '*', // Allow all origins
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed methods
-  allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
+  origin: '*', // Autoriser toutes les origines
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Méthodes autorisées
+  allowedHeaders: ['Content-Type', 'Authorization'], // En-têtes autorisés
 };
-  
 
 app.use(cors(corsOptions));
 
@@ -20,17 +19,20 @@ app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 
 // Synchroniser la base de données
-db.sequelize.sync({ alter: true }).then(() => {
-  console.log('Database synchronized and tables updated.');
-  initial();  // Initialiser les rôles après la synchronisation
-}).catch(err => {
-  console.error("Erreur lors de la synchronisation de la base de données : ", err);
-});
-// Initialiser les rôles
-function initial() {
-  const Role = db.role; // Importer le modèle Role
-  Role.findOrCreate({ where: { id: 1, name: "user" } });
-  Role.findOrCreate({ where: { id: 3, name: "admin" } });
+async function init_db() {
+  try {
+    await db.sequelize.sync({ alter: true });
+    
+    // Initialiser les rôles
+    const Role = db.role;
+    await Role.findOrCreate({ where: { id: 1, name: "user" } });
+    await Role.findOrCreate({ where: { id: 3, name: "admin" } });
+
+    console.log("Database initialized");
+  } catch (err) {
+    console.error('Error initializing database: ', err);
+    throw err;
+  }
 }
 
 // Route simple pour vérifier que l'application fonctionne
@@ -52,6 +54,9 @@ require('./app/routes/user.routes')(app);
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
+  
+  // Initialiser la base de données
+  init_db(); // Appel à la fonction d'initialisation
 });
 
 module.exports = app;
